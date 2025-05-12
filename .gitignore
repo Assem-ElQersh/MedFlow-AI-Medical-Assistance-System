@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Dataset directories - exclude all data folders
+ml_models/disease_classifiers/*/data/
+ml_models/data_preparation/datasets/
+ml_models/image_enhancement/data/
+
+# Model checkpoints and results - optionally exclude large model files
+ml_models/disease_classifiers/*/models/*.pth
+ml_models/disease_classifiers/*/models/*.pt
+ml_models/image_enhancement/models/*.pth
+ml_models/image_enhancement/models/*.pt
+
+# Large files
+*.h5
+*.hdf5
+*.pkl
+*.npz
+*.npy
+
+# Logs
+logs/
+*.log 

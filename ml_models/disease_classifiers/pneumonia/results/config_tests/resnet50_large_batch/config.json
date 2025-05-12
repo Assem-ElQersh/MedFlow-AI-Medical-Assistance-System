@@ -1,0 +1,7 @@
+{
+    "name": "resnet50_large_batch",
+    "model_type": "resnet50",
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "num_epochs": 50
+}

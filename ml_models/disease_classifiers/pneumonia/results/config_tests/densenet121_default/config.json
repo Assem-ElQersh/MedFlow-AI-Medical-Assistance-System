@@ -1,0 +1,7 @@
+{
+    "name": "densenet121_default",
+    "model_type": "densenet121",
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "num_epochs": 50
+}
