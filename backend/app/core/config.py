@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS Configuration
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]  # Frontend URL
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
     
     # Database Configuration
     POSTGRES_SERVER: str = "localhost"
