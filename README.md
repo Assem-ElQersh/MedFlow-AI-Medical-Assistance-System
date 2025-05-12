@@ -1,160 +1,157 @@
 # MedFlow: AI Medical Assistance System
 
-MedFlow is an advanced, modular AI-powered medical assistance system for automated diagnosis, medical image analysis, and expert recommendations.  
-It is designed for extensibility, clinical research, and real-world deployment.
-
----
+A comprehensive medical imaging analysis platform that combines deep learning models with expert systems for accurate disease diagnosis and image enhancement.
 
 ## Features
 
-- **AI Disease Detection**: Pneumonia (implemented), Tuberculosis, COVID-19, Brain Tumor, Skin Cancer (planned)
-- **Medical Image Enhancement**: Super-Resolution (SISR) for improved diagnostic quality
-- **Expert System**: Rule-based symptom analysis, risk assessment, and treatment recommendations
-- **Backend API**: FastAPI-based, secure, and ready for integration
-- **Data Preparation**: Unified dataset downloader and preprocessing pipelines
-- **Extensible Architecture**: Easily add new diseases, models, and expert rules
-- **(Planned) Frontend**: User-friendly web interface for clinicians and patients
+### 1. Disease Classification
+- **Pneumonia Detection** (✅ Implemented)
+  - Uses ResNet50 model for chest X-ray analysis
+  - Supports both normal and pneumonia cases
+  - Provides confidence scores and class probabilities
+  - API endpoint available for integration
 
----
+- **Other Disease Classifiers** (🚧 In Progress)
+  - Tuberculosis Detection
+  - COVID-19 Detection
+  - Brain Tumor Detection
+  - Skin Cancer Detection
+
+### 2. Image Enhancement
+- **Super-Resolution** (🚧 In Progress)
+  - Enhanced image quality
+  - Improved diagnostic accuracy
+
+### 3. Expert System
+- **Rule-based Diagnosis** (🚧 In Progress)
+  - Combines AI predictions with medical knowledge
+  - Provides comprehensive diagnostic reports
 
 ## Project Structure
 
 ```
 MedFlow/
-├── backend/
-│   └── app/
-│       ├── api/         # API endpoints (diagnosis, history, etc.)
-│       ├── core/        # Core backend logic
-│       ├── db/          # Database models and migrations
-│       ├── models/      # Pydantic models
-│       ├── schemas/     # API schemas
-│       ├── services/    # AI service integration
-│       └── main.py      # FastAPI entrypoint
-├── ml_models/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── api/            # API endpoints
+│   │   ├── core/           # Core configurations
+│   │   ├── models/         # Database models
+│   │   ├── schemas/        # Pydantic schemas
+│   │   └── services/       # Business logic
+│   └── tests/              # API tests
+├── ml_models/              # Machine learning models
 │   ├── disease_classifiers/
-│   │   └── pneumonia/
-│   │       ├── training/
-│   │       ├── models/
-│   │       └── results/
-│   ├── data_preparation/
-│   │   ├── unified_downloader.py
-│   │   ├── preprocess_datasets.py
-│   │   └── datasets/   # (excluded from git)
-│   ├── image_enhancement/
-│   │   └── training/sisr_model.py
-│   └── expert_system/
-│       ├── rules_engine/inference.py
-│       └── knowledge_base/rules.py
-├── requirements.txt
-├── .gitignore
-└── README.md
+│   │   └── pneumonia/      # Pneumonia classifier
+│   ├── image_enhancement/  # SISR model
+│   └── expert_system/      # Rule-based system
+└── frontend/               # React frontend (coming soon)
 ```
 
----
+## API Documentation
 
-## Setup Instructions
+### Pneumonia Detection API
 
-### Prerequisites
+#### Endpoint: `/api/v1/pneumonia/diagnose`
 
-- Python 3.8+
-- (Recommended) CUDA-capable GPU for model training/inference
-- PostgreSQL (for backend)
-- Node.js & npm (for planned frontend)
+**Method:** POST
 
-### 1. Environment Setup
+**Input Options:**
+1. File Upload:
+   ```python
+   import requests
+   
+   url = "http://localhost:8000/api/v1/pneumonia/diagnose"
+   files = {"file": open("chest_xray.jpg", "rb")}
+   response = requests.post(url, files=files)
+   print(response.json())
+   ```
 
-**Using Conda:**
-```bash
-conda create -n medflow python=3.8
-conda activate medflow
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-pip install -r requirements.txt
+2. File Path (if file is on server):
+   ```python
+   import requests
+   
+   url = "http://localhost:8000/api/v1/pneumonia/diagnose"
+   data = {
+       "image_path": "/path/to/chest_xray.jpg"
+   }
+   response = requests.post(url, json=data)
+   print(response.json())
+   ```
+
+**Response Format:**
+```json
+{
+    "prediction": "NORMAL",  // or "PNEUMONIA"
+    "confidence": 0.889,     // confidence score
+    "probabilities": {
+        "NORMAL": 0.889,
+        "PNEUMONIA": 0.111
+    }
+}
 ```
 
-**Or using venv:**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+## Setup and Installation
 
-### 2. Download Datasets
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/MedFlow.git
+   cd MedFlow
+   ```
 
-> **Note:** Datasets are NOT included in the repo.  
-> They are automatically excluded by `.gitignore`.
+2. **Install backend dependencies:**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
 
-Run the unified downloader:
-```bash
-python ml_models/data_preparation/unified_downloader.py
-```
-This will download all required datasets to `ml_models/data_preparation/datasets/`.
+3. **Start the backend server:**
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-### 3. Preprocess Datasets
+4. **Run tests:**
+   ```bash
+   python tests/test_pneumonia_api.py
+   ```
 
-```bash
-python ml_models/data_preparation/preprocess_datasets.py
-```
-This will clean, crop, and split all datasets for model training.
+## Next Steps
 
-### 4. Train Models
+1. **Backend Development**
+   - [ ] Implement remaining disease classifiers
+   - [ ] Add image enhancement endpoints
+   - [ ] Integrate expert system
+   - [ ] Add user authentication
+   - [ ] Add database integration
 
-- Pneumonia (example):
-  ```bash
-  python ml_models/disease_classifiers/pneumonia/training/test_configurations.py
-  ```
-- (Planned) Add and run training scripts for TB, COVID-19, brain tumor, and skin cancer.
+2. **Frontend Development**
+   - [ ] Create React application
+   - [ ] Implement user interface
+   - [ ] Add real-time predictions
+   - [ ] Create visualization components
 
-### 5. Run the Backend
+3. **Model Improvements**
+   - [ ] Train and integrate additional disease classifiers
+   - [ ] Optimize model performance
+   - [ ] Add model versioning
+   - [ ] Implement model monitoring
 
-```bash
-cd backend
-uvicorn app.main:app --reload
-```
-API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## Usage
-
-- **Diagnosis API**: Submit symptoms, vital signs, and/or images for automated diagnosis and recommendations.
-- **Image Enhancement**: Super-resolve medical images for better analysis.
-- **Expert System**: Get rule-based analysis and emergency alerts.
-
----
-
-## Development Roadmap
-
-### Implemented
-
-- Pneumonia classifier (ResNet, DenseNet, EfficientNet)
-- SISR image enhancement
-- Unified dataset downloader & preprocessing
-- Expert system (symptom analysis, risk, treatment)
-- Modular backend API
-
-### In Progress / Planned
-
-- Add classifiers for: Tuberculosis, COVID-19, Brain Tumor, Skin Cancer
-- Expand expert system knowledge base
-- Frontend web interface (React or similar)
-- Telemedicine and real-time alert integration
-- More robust testing and CI/CD
-- Dockerization and deployment scripts
-
----
+4. **Documentation**
+   - [ ] Add API documentation
+   - [ ] Create user guides
+   - [ ] Add deployment instructions
+   - [ ] Document model training process
 
 ## Contributing
 
-1. Fork the repo and create a feature branch
-2. Commit your changes
-3. Push and open a Pull Request
-4. Please follow code style and add tests where possible
-
----
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
-MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
