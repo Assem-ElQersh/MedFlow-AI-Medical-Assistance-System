@@ -96,45 +96,79 @@ class DatasetPreprocessor:
         """Preprocess entire dataset"""
         print(f"\nPreprocessing {dataset_type} dataset...")
         
-        # Create train/val/test directories
-        for split in ['train', 'val', 'test']:
-            os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
-        
-        # Process each class
-        for class_name in os.listdir(self.input_path):
-            class_path = os.path.join(self.input_path, class_name)
-            if not os.path.isdir(class_path):
-                continue
-            
-            # Get all images
-            image_files = [f for f in os.listdir(class_path) 
-                         if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-            
-            # Shuffle and split
-            np.random.shuffle(image_files)
-            n = len(image_files)
-            train_files = image_files[:int(0.7*n)]
-            val_files = image_files[int(0.7*n):int(0.85*n)]
-            test_files = image_files[int(0.85*n):]
-            
-            # Process each split
-            for split, files in [('train', train_files), 
-                               ('val', val_files), 
-                               ('test', test_files)]:
-                output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
-                os.makedirs(output_dir, exist_ok=True)
-                
-                for file in tqdm(files, desc=f"Processing {split} {class_name}"):
-                    img_path = os.path.join(class_path, file)
-                    processed_img = self.process_image(img_path, dataset_type)
+        if dataset_type == 'pneumonia':
+            # For pneumonia, use existing train/val/test split
+            for split in ['train', 'val', 'test']:
+                split_path = os.path.join(self.input_path, 'chest_xray', split)
+                if not os.path.exists(split_path):
+                    continue
                     
-                    if processed_img is not None:
-                        output_path = os.path.join(output_dir, file)
-                        cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+                # Process each class in the split
+                for class_name in os.listdir(split_path):
+                    class_path = os.path.join(split_path, class_name)
+                    if not os.path.isdir(class_path):
+                        continue
+                    
+                    # Create output directory
+                    output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    # Process all images in the class
+                    image_files = [f for f in os.listdir(class_path) 
+                                 if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                    
+                    for file in tqdm(image_files, desc=f"Processing {split} {class_name}"):
+                        img_path = os.path.join(class_path, file)
+                        processed_img = self.process_image(img_path, dataset_type)
+                        
+                        if processed_img is not None:
+                            output_path = os.path.join(output_dir, file)
+                            cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+        else:
+            # Original preprocessing logic for other datasets
+            # Create train/val/test directories
+            for split in ['train', 'val', 'test']:
+                os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
+            
+            # Process each class
+            for class_name in os.listdir(self.input_path):
+                class_path = os.path.join(self.input_path, class_name)
+                if not os.path.isdir(class_path):
+                    continue
+                
+                # Get all images
+                image_files = [f for f in os.listdir(class_path) 
+                             if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                
+                # Shuffle and split
+                np.random.shuffle(image_files)
+                n = len(image_files)
+                train_files = image_files[:int(0.7*n)]
+                val_files = image_files[int(0.7*n):int(0.85*n)]
+                test_files = image_files[int(0.85*n):]
+                
+                # Process each split
+                for split, files in [('train', train_files), 
+                                   ('val', val_files), 
+                                   ('test', test_files)]:
+                    output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    for file in tqdm(files, desc=f"Processing {split} {class_name}"):
+                        img_path = os.path.join(class_path, file)
+                        processed_img = self.process_image(img_path, dataset_type)
+                        
+                        if processed_img is not None:
+                            output_path = os.path.join(output_dir, file)
+                            cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
 
 def main():
     # Define dataset paths
     datasets = {
+        'pneumonia': {
+            'input': 'ml_models/disease_classifiers/pneumonia/data',
+            'output': 'ml_models/disease_classifiers/pneumonia/data/processed'
+        },
         'tuberculosis': {
             'input': 'ml_models/data_preparation/datasets/tuberculosis',
             'output': 'ml_models/data_preparation/processed/tuberculosis'

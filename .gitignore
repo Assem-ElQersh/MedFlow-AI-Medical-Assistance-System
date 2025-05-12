@@ -40,12 +40,15 @@ env/
 ml_models/disease_classifiers/*/data/
 ml_models/data_preparation/datasets/
 ml_models/image_enhancement/data/
+ml_models/data_preparation/processed/
+ml_models/disease_classifiers/*/data/processed/
 
-# Model checkpoints and results - optionally exclude large model files
+# Model checkpoints and results - exclude large model files
 ml_models/disease_classifiers/*/models/*.pth
 ml_models/disease_classifiers/*/models/*.pt
 ml_models/image_enhancement/models/*.pth
 ml_models/image_enhancement/models/*.pt
+ml_models/disease_classifiers/*/results/predictions/
 
 # Large files
 *.h5
@@ -53,7 +56,18 @@ ml_models/image_enhancement/models/*.pt
 *.pkl
 *.npz
 *.npy
+*.zip
+*.tar.gz
+*.rar
+*.7z
 
 # Logs
 logs/
-*.log 
+*.log
+download.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/ 

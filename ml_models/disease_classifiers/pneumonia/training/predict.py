@@ -4,19 +4,28 @@ from torchvision import transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 from pneumonia_classifier import get_model, CONFIG
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Configuration Parameters
 CONFIG = {
-    'data_dir': 'ml_models/data_preparation/datasets/pneumonia',
+    'data_dir': 'ml_models/disease_classifiers/pneumonia/data/processed/pneumonia',
     'model_save_dir': 'ml_models/disease_classifiers/pneumonia/models',
     'results_dir': 'ml_models/disease_classifiers/pneumonia/results',
     'image_size': 224,
+    'model_type': 'resnet50',  # Default to ResNet50, can be changed to match your trained model
+    'num_classes': 2,
     'class_names': ['NORMAL', 'PNEUMONIA'],
     'device': torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 }
 
 def load_model(model_path):
     """Load a trained model"""
+    logger.info(f"Loading model from {model_path}")
+    
     # Initialize model
     model = get_model(CONFIG['model_type'], CONFIG['num_classes'])
     
@@ -28,10 +37,13 @@ def load_model(model_path):
     model.eval()
     model = model.to(CONFIG['device'])
     
+    logger.info(f"Model loaded successfully. Using device: {CONFIG['device']}")
     return model
 
 def predict_image(model, image_path):
     """Make prediction for a single image"""
+    logger.info(f"Processing image: {image_path}")
+    
     # Load and preprocess image
     image = Image.open(image_path).convert('RGB')
     
@@ -93,12 +105,12 @@ def main():
     model_path = os.path.join(CONFIG['model_save_dir'], 'best_model.pth')
     
     if not os.path.exists(model_path):
-        print(f"Error: Model not found at {model_path}")
-        print("Please train the model first using pneumonia_classifier.py")
+        logger.error(f"Error: Model not found at {model_path}")
+        logger.error("Please train the model first using pneumonia_classifier.py")
         return
     
     # Load model
-    print("Loading model...")
+    logger.info("Loading model...")
     model = load_model(model_path)
     
     # Create results directory for predictions
@@ -107,9 +119,15 @@ def main():
     
     # Test on some sample images
     test_dir = os.path.join(CONFIG['data_dir'], 'test')
+    if not os.path.exists(test_dir):
+        logger.error(f"Test directory not found at {test_dir}")
+        logger.error("Please ensure the test data is in the correct location")
+        return
+        
     for class_name in CONFIG['class_names']:
         class_dir = os.path.join(test_dir, class_name)
         if not os.path.exists(class_dir):
+            logger.warning(f"Class directory not found: {class_dir}")
             continue
             
         # Get first image from each class
@@ -117,19 +135,19 @@ def main():
             img_path = os.path.join(class_dir, img_name)
             
             # Make prediction
-            print(f"\nPredicting for {img_path}...")
+            logger.info(f"\nPredicting for {img_path}...")
             prediction = predict_image(model, img_path)
             
             # Print results
-            print(f"Predicted class: {prediction['class']}")
-            print(f"Confidence: {prediction['confidence']:.2%}")
+            logger.info(f"Predicted class: {prediction['class']}")
+            logger.info(f"Confidence: {prediction['confidence']:.2%}")
             
             # Visualize
             fig = visualize_prediction(img_path, prediction)
             save_path = os.path.join(pred_dir, f"pred_{class_name}_{img_name}.png")
             fig.savefig(save_path)
             plt.close(fig)
-            print(f"Visualization saved to {save_path}")
+            logger.info(f"Visualization saved to {save_path}")
 
 if __name__ == '__main__':
     main() 
