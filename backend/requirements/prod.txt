@@ -1,0 +1,13 @@
+-r base.txt
+
+# Production Server
+gunicorn==21.2.0
+uvicorn[standard]==0.24.0
+
+# Monitoring
+prometheus-client==0.19.0
+sentry-sdk==1.35.0
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4 

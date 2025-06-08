@@ -6,6 +6,9 @@ import imutils
 from tqdm import tqdm
 import shutil
 from pathlib import Path
+import sys
+sys.path.append('C:/Users/assem/Desktop/MedFlow-AI-Medical-Assistance-System')
+from data.unified_downloader import download_all_datasets
 
 class DatasetPreprocessor:
     def __init__(self, input_path, output_path, target_size=(224, 224)):
@@ -124,8 +127,160 @@ class DatasetPreprocessor:
                         if processed_img is not None:
                             output_path = os.path.join(output_dir, file)
                             cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+        
+        elif dataset_type == 'tuberculosis':
+            # Special handling for tuberculosis dataset
+            db_path = os.path.join(self.input_path, 'TB_Chest_Radiography_Database')
+            if not os.path.exists(db_path):
+                print(f"Tuberculosis database not found at {db_path}")
+                return
+                
+            # Create train/val/test directories
+            for split in ['train', 'val', 'test']:
+                os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
+            
+            # Process Normal and Tuberculosis classes
+            for class_name in ['Normal', 'Tuberculosis']:
+                class_path = os.path.join(db_path, class_name)
+                if not os.path.exists(class_path):
+                    continue
+                
+                # Get all images
+                image_files = [f for f in os.listdir(class_path) 
+                             if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                
+                # Shuffle and split
+                np.random.shuffle(image_files)
+                n = len(image_files)
+                train_files = image_files[:int(0.7*n)]
+                val_files = image_files[int(0.7*n):int(0.85*n)]
+                test_files = image_files[int(0.85*n):]
+                
+                # Process each split
+                for split, files in [('train', train_files), 
+                                   ('val', val_files), 
+                                   ('test', test_files)]:
+                    output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    for file in tqdm(files, desc=f"Processing {split} {class_name}"):
+                        img_path = os.path.join(class_path, file)
+                        processed_img = self.process_image(img_path, dataset_type)
+                        
+                        if processed_img is not None:
+                            output_path = os.path.join(output_dir, file)
+                            cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+        
+        elif dataset_type == 'covid':
+            # Special handling for COVID-19 dataset
+            db_path = os.path.join(self.input_path, 'COVID-19_Radiography_Dataset')
+            if not os.path.exists(db_path):
+                print(f"COVID-19 database not found at {db_path}")
+                return
+                
+            # Create train/val/test directories
+            for split in ['train', 'val', 'test']:
+                os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
+            
+            # Process all classes
+            for class_name in ['COVID', 'Normal', 'Lung_Opacity', 'Viral Pneumonia']:
+                class_path = os.path.join(db_path, class_name, 'images')
+                if not os.path.exists(class_path):
+                    print(f"Class path not found: {class_path}")
+                    continue
+                
+                # Get all images
+                image_files = [f for f in os.listdir(class_path) 
+                             if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                
+                # Shuffle and split
+                np.random.shuffle(image_files)
+                n = len(image_files)
+                train_files = image_files[:int(0.7*n)]
+                val_files = image_files[int(0.7*n):int(0.85*n)]
+                test_files = image_files[int(0.85*n):]
+                
+                # Process each split
+                for split, files in [('train', train_files), 
+                                   ('val', val_files), 
+                                   ('test', test_files)]:
+                    output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    for file in tqdm(files, desc=f"Processing {split} {class_name}"):
+                        img_path = os.path.join(class_path, file)
+                        processed_img = self.process_image(img_path, dataset_type)
+                        
+                        if processed_img is not None:
+                            output_path = os.path.join(output_dir, file)
+                            cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+        
+        elif dataset_type == 'brain_tumor':
+            # Special handling for brain tumor dataset
+            # Create train/val/test directories
+            for split in ['train', 'val', 'test']:
+                os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
+            
+            # Process Training data (70% train, 15% val, 15% test)
+            training_path = os.path.join(self.input_path, 'Training')
+            if os.path.exists(training_path):
+                for class_name in ['glioma', 'meningioma', 'notumor', 'pituitary']:
+                    class_path = os.path.join(training_path, class_name)
+                    if not os.path.exists(class_path):
+                        continue
+                    
+                    # Get all images
+                    image_files = [f for f in os.listdir(class_path) 
+                                 if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                    
+                    # Shuffle and split
+                    np.random.shuffle(image_files)
+                    n = len(image_files)
+                    train_files = image_files[:int(0.7*n)]
+                    val_files = image_files[int(0.7*n):int(0.85*n)]
+                    test_files = image_files[int(0.85*n):]
+                    
+                    # Process each split
+                    for split, files in [('train', train_files), 
+                                       ('val', val_files), 
+                                       ('test', test_files)]:
+                        output_dir = os.path.join(self.output_path, dataset_type, split, class_name)
+                        os.makedirs(output_dir, exist_ok=True)
+                        
+                        for file in tqdm(files, desc=f"Processing {split} {class_name}"):
+                            img_path = os.path.join(class_path, file)
+                            processed_img = self.process_image(img_path, dataset_type)
+                            
+                            if processed_img is not None:
+                                output_path = os.path.join(output_dir, file)
+                                cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+            
+            # Process Testing data (all goes to test set)
+            testing_path = os.path.join(self.input_path, 'Testing')
+            if os.path.exists(testing_path):
+                for class_name in ['glioma', 'meningioma', 'notumor', 'pituitary']:
+                    class_path = os.path.join(testing_path, class_name)
+                    if not os.path.exists(class_path):
+                        continue
+                    
+                    # Get all images
+                    image_files = [f for f in os.listdir(class_path) 
+                                 if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                    
+                    # Process all images
+                    output_dir = os.path.join(self.output_path, dataset_type, 'test', class_name)
+                    os.makedirs(output_dir, exist_ok=True)
+                    
+                    for file in tqdm(image_files, desc=f"Processing test {class_name}"):
+                        img_path = os.path.join(class_path, file)
+                        processed_img = self.process_image(img_path, dataset_type)
+                        
+                        if processed_img is not None:
+                            output_path = os.path.join(output_dir, file)
+                            cv2.imwrite(output_path, cv2.cvtColor(processed_img, cv2.COLOR_RGB2BGR))
+        
         else:
-            # Original preprocessing logic for other datasets
+            # Original preprocessing logic for other datasets (skin cancer)
             # Create train/val/test directories
             for split in ['train', 'val', 'test']:
                 os.makedirs(os.path.join(self.output_path, dataset_type, split), exist_ok=True)
@@ -166,24 +321,24 @@ def main():
     # Define dataset paths
     datasets = {
         'pneumonia': {
-            'input': 'ml_models/disease_classifiers/pneumonia/data',
-            'output': 'ml_models/disease_classifiers/pneumonia/data/processed'
+            'input': 'data/pneumonia',
+            'output': 'data/pneumonia/processed'
         },
         'tuberculosis': {
-            'input': 'ml_models/data_preparation/datasets/tuberculosis',
-            'output': 'ml_models/data_preparation/processed/tuberculosis'
+            'input': 'data/tuberculosis',
+            'output': 'data/tuberculosis/processed'
         },
         'covid': {
-            'input': 'ml_models/data_preparation/datasets/covid19',
-            'output': 'ml_models/data_preparation/processed/covid'
+            'input': 'data/covid19',
+            'output': 'data/covid19/processed'
         },
         'brain_tumor': {
-            'input': 'ml_models/data_preparation/datasets/brain_tumor',
-            'output': 'ml_models/data_preparation/processed/brain_tumor'
+            'input': 'data/brain_tumor',
+            'output': 'data/brain_tumor/processed'
         },
         'skin_cancer': {
-            'input': 'ml_models/data_preparation/datasets/skin_cancer',
-            'output': 'ml_models/data_preparation/processed/skin_cancer'
+            'input': 'data/skin_cancer',
+            'output': 'data/skin_cancer/processed'
         }
     }
     

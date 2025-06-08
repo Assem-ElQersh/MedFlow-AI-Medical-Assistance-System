@@ -36,6 +36,12 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Data directories
+data/
+!data/unified_downloader.py
+data/*/
+!data/__init__.py
+
 # Dataset directories - exclude all data folders
 ml_models/disease_classifiers/*/data/
 ml_models/data_preparation/datasets/
